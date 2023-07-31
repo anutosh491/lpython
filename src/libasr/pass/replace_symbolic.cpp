@@ -162,4 +162,5 @@ void pass_replace_symbolic(Allocator &al, ASR::TranslationUnit_t &unit,
     ReplaceSymbolicVisitor v(al);
     v.visit_TranslationUnit(unit);
 }
+
 } // namespace LCompilers
