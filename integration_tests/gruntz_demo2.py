@@ -145,14 +145,16 @@ def mrv(e, x):
 
     if e == x:
         return {x}
-    if e.is_Mul or e.is_Add:
+    elif e.is_Integer:
+        return {}
+    elif e.is_Mul or e.is_Add:
         a, b = e.as_two_terms()
         ans1 = mrv(a, x)
         ans2 = mrv(b, x)
         return mrv_max(mrv(a, x), mrv(b, x), x)
-    if e.is_Pow:
+    elif e.is_Pow:
         return mrv(e.base, x)
-    if e.is_Function:
+    elif e.is_Function:
         return reduce(lambda a, b: mrv_max(a, b, x), (mrv(a, x) for a in e.args))
     raise NotImplementedError(f"Can't calculate the MRV of {e}.")
 
@@ -330,9 +332,16 @@ def gruntz(e, z, z0, dir="+"):
 
 # tests
 x = Symbol('x')
-ans = gruntz(sin(x)/x, x, 0)
-print(ans)
-print(gruntz(sin(x)**2/x, x, 0))
-print(gruntz(sin(x)/x**2, x, 0))
-print(gruntz(sin(x)**2/x**2, x, 0))
-print(gruntz(sin(sin(sin(x)))/sin(x), x, 0))
+# Print the basic limit:
+print(gruntz(sin(x)/x, x, 0))
+
+# Test other cases
+assert gruntz(sin(x)/x, x, 0) == 1
+assert gruntz(2*sin(x)/x, x, 0) == 2
+assert gruntz(sin(2*x)/x, x, 0) == 2
+assert gruntz(sin(x)**2/x, x, 0) == 0
+assert gruntz(sin(x)/x**2, x, 0) == oo
+assert gruntz(sin(x)**2/x**2, x, 0) == 1
+assert gruntz(sin(sin(sin(x)))/sin(x), x, 0) == 1
+assert gruntz(2*log(x+1)/x, x, 0) == 2
+assert gruntz(sin((log(x+1)/x)*x)/x, x, 0) == 1
