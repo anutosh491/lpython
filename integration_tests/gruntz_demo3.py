@@ -89,8 +89,12 @@ def rewrite(e: S, x: S, w: S) -> S:
     (log(x)/y, -x)
 
     """
-    pass
+    Omega: list[S] = mrv(e, x)
+    Omega1: S = Omega[0]
 
+    if Omega1 == x:
+        newe: S = e.subs(x, S(1)/w)
+        return newe
 
 def sign(e: S) -> S:
     """
