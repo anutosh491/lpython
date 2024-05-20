@@ -30,6 +30,24 @@ def mrv(e: S, x: S) -> list[S]:
         return reduce(lambda a, b: mrv_max(a, b, x), (mrv(a, x) for a in e.args))
     raise NotImplementedError(f"Can't calculate the MRV of {e}.")
 
+def mrv_max(f: list[S], g: list[S], x: S) -> list[S]:
+    """Compute the maximum of two MRV sets.
+
+    Examples
+    ========
+
+    >>> mrv_max({log(x)}, {x**5}, x)
+    {x**5}
+
+    """
+
+    if len(f) == 0:
+        return g
+    elif len(g) == 0:
+        return f
+    else:
+        return f | g
+
 
 def sign(e: S) -> S:
     """
