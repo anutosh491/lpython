@@ -48,6 +48,35 @@ def mrv_max(f: list[S], g: list[S], x: S) -> list[S]:
     else:
         return f | g
 
+def rewrite(e: S, x: S, w: S) -> S:
+    """
+    Rewrites the expression in terms of the MRV subexpression.
+
+    Parameters
+    ==========
+
+    e : Expr
+        an expression
+    x : Symbol
+        variable of the `e`
+    w : Symbol
+        The symbol which is going to be used for substitution in place
+        of the MRV in `x` subexpression.
+
+    Returns
+    =======
+
+    The rewritten expression
+
+    Examples
+    ========
+
+    >>> rewrite(exp(x)*log(x), x, y)
+    (log(x)/y, -x)
+
+    """
+    pass
+
 
 def sign(e: S) -> S:
     """
