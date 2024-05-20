@@ -13,6 +13,9 @@ def mrv(e: S, x: S) -> list[S]:
 
     """
 
+    if e.is_integer:
+        empty_list: list[S] = []
+        return empty_list
     if e == x:
         list1: list[S] = [x]
         return list1
@@ -26,8 +29,11 @@ def mrv(e: S, x: S) -> list[S]:
         base: S = e.args[0]
         list3: list[S] = mrv(base, x)
         return list3
-    if e.is_Function:
-        return reduce(lambda a, b: mrv_max(a, b, x), (mrv(a, x) for a in e.args))
+    if e.func == sin:
+        list4: list[S] = [x]
+        return list4
+    # elif e.is_Function:
+    #     return reduce(lambda a, b: mrv_max(a, b, x), (mrv(a, x) for a in e.args))
     raise NotImplementedError(f"Can't calculate the MRV of {e}.")
 
 def mrv_max(f: list[S], g: list[S], x: S) -> list[S]:
@@ -45,8 +51,16 @@ def mrv_max(f: list[S], g: list[S], x: S) -> list[S]:
         return g
     elif len(g) == 0:
         return f
+    # elif f & g:
+    #     return f | g
     else:
-        return f | g
+        f1: S = f[0]
+        g1: S = g[0]
+        bool1: bool = f1 == x
+        bool2: bool = g1 == x
+        if bool1 and bool2:
+            l: list[S] = [x]
+            return l
 
 def rewrite(e: S, x: S, w: S) -> S:
     """
