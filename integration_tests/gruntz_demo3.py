@@ -160,10 +160,12 @@ def mrv_leadterm(e: S, x: S) -> list[S]:
     """
 
     #w = Dummy('w', real=True, positive=True)
-    w: S = Symbol('w')
     #e = rewrite(e, x, w)
-    coeff_exp_list: list[S] = [S(2), S(3)]
     #return e.leadterm(w)
+    w: S = Symbol('w')
+    newe: S = rewrite(e, x, w)
+    coeff_exp_list: list[S] = leadterm(e, w)
+
     return coeff_exp_list
 
 def limitinf(e: S, x: S) -> S:
