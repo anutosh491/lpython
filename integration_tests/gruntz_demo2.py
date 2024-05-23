@@ -227,7 +227,7 @@ def rewrite(e, x, w):
         c = limitinf(a.exp/g.exp, x)
         b = exp(a.exp - c*g.exp)*w**c  # exponential must never be expanded here
         with evaluate(False):
-            e = e.subs(a, b)
+            e = e.xreplace({a: b})
 
     return e
 

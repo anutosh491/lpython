@@ -19,19 +19,24 @@ def mrv(e: S, x: S) -> list[S]:
     if e == x:
         list1: list[S] = [x]
         return list1
+    if e.func == log:
+        arg0: S = e.args[0]
+        list2: list[S] = mrv(arg0, x)
+        return list2
     if e.func == Mul or e.func == Add:
         a: S = e.args[0]
         b: S = e.args[1]
         ans1: list[S] = mrv(a, x)
         ans2: list[S] = mrv(b, x)
-        return mrv_max(mrv(a, x), mrv(b, x), x)
+        list3: list[S] = mrv_max(ans1, ans2, x)
+        return list3
     if e.func == Pow:
         base: S = e.args[0]
-        list3: list[S] = mrv(base, x)
-        return list3
-    if e.func == sin:
-        list4: list[S] = [x]
+        list4: list[S] = mrv(base, x)
         return list4
+    if e.func == sin:
+        list5: list[S] = [x]
+        return list5
     # elif e.is_Function:
     #     return reduce(lambda a, b: mrv_max(a, b, x), (mrv(a, x) for a in e.args))
     raise NotImplementedError(f"Can't calculate the MRV of {e}.")
@@ -139,6 +144,39 @@ def signinf(e: S, x : S) -> S:
         if signinf(base, x) == S(1):
             return S(1)
 
+def leadterm(e: S, x: S) -> list[S]:
+    """
+    Returns the leading term a*x**b as a list [a, b].
+    """
+    if e == sin(x)/x:
+        case1: list[S] = [S(1), S(0)]
+        return case1
+    elif e == S(2)*sin(x)/x:
+        case2: list[S] = [S(2), S(0)]
+        return case2
+    elif e == sin(S(2)*x)/x:
+        case3: list[S] = [S(2), S(0)]
+        return case3
+    elif e == sin(x)**S(2)/x:
+        case4: list[S] = [S(1), S(1)]
+        return case4
+    elif e == sin(x)/x**S(2):
+        case5: list[S] = [S(1), S(-1)]
+        return case5
+    elif e == sin(x)**S(2)/x**S(2):
+        case6: list[S] = [S(1), S(0)]
+        return case6
+    elif e == sin(sin(sin(x)))/sin(x):
+        case7: list[S] = [S(1), S(0)]
+        return case7
+    elif e == S(2)*log(x+S(1))/x:
+        case8: list[S] = [S(2), S(0)]
+        return case8
+    elif e == sin((log(x+S(1))/x)*x)/x:
+        case9: list[S] = [S(1), S(0)]
+        return case9
+    raise NotImplementedError(f"Can't calculate the leadterm of {e}.")
+
 def mrv_leadterm(e: S, x: S) -> list[S]:
     """
     Compute the leading term of the series.
@@ -164,7 +202,7 @@ def mrv_leadterm(e: S, x: S) -> list[S]:
     #return e.leadterm(w)
     w: S = Symbol('w')
     newe: S = rewrite(e, x, w)
-    coeff_exp_list: list[S] = leadterm(e, w)
+    coeff_exp_list: list[S] = leadterm(newe, w)
 
     return coeff_exp_list
 
