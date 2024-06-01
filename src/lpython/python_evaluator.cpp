@@ -41,6 +41,22 @@ PythonCompiler::PythonCompiler(CompilerOptions compiler_options)
 
 PythonCompiler::~PythonCompiler() = default;
 
+Result<PythonCompiler::EvalResult> PythonCompiler::evaluate2(const std::string &code) {
+    LocationManager lm;
+    LCompilers::PassManager lpm;
+    lpm.use_default_passes();
+    {
+        LCompilers::LocationManager::FileLocations fl;
+        fl.in_filename = "input";
+        std::ofstream out("input");
+        out << code;
+        lm.files.push_back(fl);
+        lm.init_simple(code);
+        lm.file_ends.push_back(code.size());
+    }
+    diag::Diagnostics diagnostics;
+    return evaluate(code, false, lm, lpm, diagnostics);
+}
 
 Result<PythonCompiler::EvalResult> PythonCompiler::evaluate(
 #ifdef HAVE_LFORTRAN_LLVM
@@ -103,13 +119,66 @@ Result<PythonCompiler::EvalResult> PythonCompiler::evaluate(
     }
 
     bool call_run_fn = false;
+    std::string return_type;
     if (m->get_return_type(run_fn) != "none") {
         call_run_fn = true;
+        return_type = m->get_return_type(run_fn);
     }
 
     e->add_module(std::move(m));
     if (call_run_fn) {
-        e->voidfn(run_fn);
+        if (return_type == "integer4") {
+            ASR::symbol_t *fn = ASR::down_cast<ASR::Module_t>(symbol_table->resolve_symbol(module_name))
+                                    ->m_symtab->get_symbol(run_fn);
+            LCOMPILERS_ASSERT(fn)
+            if (ASRUtils::get_FunctionType(fn)->m_return_var_type->type == ASR::ttypeType::UnsignedInteger) {
+                uint32_t r = e->int32fn(run_fn);
+                result.type = EvalResult::unsignedInteger4;
+                result.u32 = r;
+            } else {
+                int32_t r = e->int32fn(run_fn);
+                result.type = EvalResult::integer4;
+                result.i32 = r;
+            }
+        } else if (return_type == "integer8") {
+            ASR::symbol_t *fn = ASR::down_cast<ASR::Module_t>(symbol_table->resolve_symbol(module_name))
+                                    ->m_symtab->get_symbol(run_fn);
+            LCOMPILERS_ASSERT(fn)
+            if (ASRUtils::get_FunctionType(fn)->m_return_var_type->type == ASR::ttypeType::UnsignedInteger) {
+                uint64_t r = e->int64fn(run_fn);
+                result.type = EvalResult::unsignedInteger8;
+                result.u64 = r;
+            } else {
+                int64_t r = e->int64fn(run_fn);
+                result.type = EvalResult::integer8;
+                result.i64 = r;
+            }
+        } else if (return_type == "real4") {
+            float r = e->floatfn(run_fn);
+            result.type = EvalResult::real4;
+            result.f32 = r;
+        } else if (return_type == "real8") {
+            double r = e->doublefn(run_fn);
+            result.type = EvalResult::real8;
+            result.f64 = r;
+        } else if (return_type == "complex4") {
+            std::complex<float> r = e->complex4fn(run_fn);
+            result.type = EvalResult::complex4;
+            result.c32.re = r.real();
+            result.c32.im = r.imag();
+        } else if (return_type == "complex8") {
+            std::complex<double> r = e->complex8fn(run_fn);
+            result.type = EvalResult::complex8;
+            result.c64.re = r.real();
+            result.c64.im = r.imag();
+        } else if (return_type == "void") {
+            e->voidfn(run_fn);
+            result.type = EvalResult::statement;
+        } else if (return_type == "none") {
+            result.type = EvalResult::none;
+        } else {
+            throw LCompilersException("FortranEvaluator::evaluate(): Return type not supported");
+        }
     }
 
     if (call_run_fn) {

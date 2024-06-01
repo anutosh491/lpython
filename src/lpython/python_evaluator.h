@@ -37,11 +37,13 @@ public:
 
     struct EvalResult {
         enum {
-            integer4, integer8, real4, real8, complex4, complex8, statement, none
+            integer4, integer8, unsignedInteger4, unsignedInteger8, real4, real8, complex4, complex8, statement, none
         } type;
         union {
             int32_t i32;
             int64_t i64;
+            uint32_t u32;
+            uint64_t u64;
             float f32;
             double f64;
             struct {float re, im;} c32;
@@ -55,7 +57,9 @@ public:
     Result<PythonCompiler::EvalResult> evaluate(
             const std::string &code_orig, bool verbose, LocationManager &lm,
             LCompilers::PassManager& pass_manager, diag::Diagnostics &diagnostics);
-    
+
+    Result<PythonCompiler::EvalResult> evaluate2(const std::string &code);
+
     Result<LCompilers::LPython::AST::ast_t*> get_ast2(
             const std::string &code_orig, diag::Diagnostics &diagnostics);
     
